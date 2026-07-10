@@ -332,17 +332,14 @@ export default function AccountPage() {
         )}
       </main>
 
-      {profile && (
-        <>
-          <EditProfileSheet
-            profile={profile}
-            open={editOpen}
-            onClose={() => setEditOpen(false)}
-            onSaved={setProfile}
-          />
-          <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
-        </>
+      {profile && editOpen && (
+        <EditProfileSheet
+          profile={profile}
+          onClose={() => setEditOpen(false)}
+          onSaved={setProfile}
+        />
       )}
+      {passwordOpen && <ChangePasswordModal onClose={() => setPasswordOpen(false)} />}
 
       <BottomNav />
     </div>
@@ -430,14 +427,15 @@ function InfoRow({
 }
 
 // --- Form edit profil, dalam BottomSheet ----------------------------------
+// Cuma di-mount selagi sheet terbuka (lihat pemanggilnya) — jadi tiap kali
+// dibuka lagi, komponen ini mount baru dan useState di bawah otomatis mulai
+// dari data profil terbaru, tanpa perlu effect buat reset state manual.
 function EditProfileSheet({
   profile,
-  open,
   onClose,
   onSaved,
 }: {
   profile: Profile;
-  open: boolean;
   onClose: () => void;
   onSaved: (updated: Profile) => void;
 }) {
@@ -448,18 +446,6 @@ function EditProfileSheet({
   const [email, setEmail] = useState(profile.email);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  // Re-sync tiap kali sheet dibuka, supaya selalu mulai dari data terbaru
-  // (bukan sisa input percobaan edit sebelumnya).
-  useEffect(() => {
-    if (open) {
-      setName(profile.name);
-      setGender(profile.gender);
-      setPhone(profile.phone_number);
-      setEmail(profile.email);
-      setErrors({});
-    }
-  }, [open, profile]);
 
   const nameValid = name.trim().length >= 2;
   const phoneValid = phone.trim().length >= 8;
@@ -489,7 +475,7 @@ function EditProfileSheet({
   }
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="Edit Profil">
+    <BottomSheet open onClose={onClose} title="Edit Profil">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <FieldInput
           label="Nama Lengkap"
@@ -534,20 +520,14 @@ function EditProfileSheet({
 }
 
 // --- Form ubah password, dalam Modal --------------------------------------
-function ChangePasswordModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+// Sama seperti EditProfileSheet: cuma di-mount selagi modal terbuka, jadi
+// state password selalu mulai kosong tanpa perlu effect reset manual.
+function ChangePasswordModal({ onClose }: { onClose: () => void }) {
   const { showToast } = useToast();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setOldPassword("");
-      setNewPassword("");
-      setErrors({});
-    }
-  }, [open]);
 
   const newPasswordValid = newPassword.length >= 8;
 
@@ -574,7 +554,7 @@ function ChangePasswordModal({ open, onClose }: { open: boolean; onClose: () => 
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Ubah Password">
+    <Modal open onClose={onClose} title="Ubah Password">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <FieldInput
           label="Password Lama"

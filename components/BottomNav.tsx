@@ -8,7 +8,7 @@ const ITEMS = [
   { href: "/home", label: "Beranda", icon: "home" },
   { href: "/progress", label: "Progres", icon: "query_stats" },
   { href: "/chatbot", label: "AI Chat", icon: "smart_toy" },
-  { href: "#", label: "Reward", icon: "military_tech" },
+  { href: "/reward", label: "Reward", icon: "military_tech" },
   { href: "/account", label: "Akun", icon: "person" },
 ];
 
