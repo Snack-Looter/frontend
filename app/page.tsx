@@ -8,6 +8,7 @@ import { RoleCard, type RoleColor } from "@/components/game/RoleCard";
 
 type Role = {
   icon: string;
+  mascot: string;
   name: string;
   description: string;
   badge?: string;
@@ -17,6 +18,7 @@ type Role = {
 const ROLES: Role[] = [
   {
     icon: "storefront",
+    mascot: "/mascot-affiliator.png",
     name: "Affiliator",
     description: "Jual produk koperasi dan dapat komisi dari setiap penjualan",
     badge: "Paling populer",
@@ -24,12 +26,14 @@ const ROLES: Role[] = [
   },
   {
     icon: "photo_camera",
+    mascot: "/mascot-content-creator.png",
     name: "Content Creator",
     description: "Bikin konten promosi yang menarik untuk produk koperasi",
     color: "secondary",
   },
   {
     icon: "diversity_3",
+    mascot: "/mascot-duta-sebaya.jpg",
     name: "Duta Sebaya",
     description: "Ajak warga bergabung dan kenalkan koperasi ke lingkungan sekitar",
     color: "tertiary",
@@ -63,9 +67,23 @@ export default function Home() {
       <main className="flex-grow pt-16 pb-24 max-w-app mx-auto w-full px-md">
         {/* 1. Hero */}
         <section className="pt-12 pb-14 flex flex-col items-center text-center gap-5">
-          <span className="material-symbols-rounded text-tertiary" style={{ fontSize: 56 }}>
-            bolt
-          </span>
+          <div className="flex items-end justify-center">
+            <img
+              src="/mascot-content-creator.png"
+              alt="Maskot Content Creator"
+              className="w-16 h-16 -mr-3 rotate-[-8deg] rounded-full border-2.5 border-ink object-cover shadow-solid-sm"
+            />
+            <img
+              src="/mascot-affiliator.png"
+              alt="Maskot Affiliator KopQuest"
+              className="w-24 h-24 rounded-full border-2.5 border-ink object-cover shadow-solid-sm z-10"
+            />
+            <img
+              src="/mascot-duta-sebaya.jpg"
+              alt="Maskot Duta Sebaya"
+              className="w-16 h-16 -ml-3 rotate-[8deg] rounded-full border-2.5 border-ink object-cover shadow-solid-sm"
+            />
+          </div>
           <h2 className="font-display text-display text-balance max-w-[32rem]">
             Bantu koperasimu, naik level, dapat cuan nyata.
           </h2>
@@ -91,7 +109,13 @@ export default function Home() {
                 badge={role.badge}
                 name={role.name}
                 description={role.description}
-                icon={<span className="material-symbols-rounded">{role.icon}</span>}
+                icon={
+                  <img
+                    src={role.mascot}
+                    alt={`Maskot ${role.name}`}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                }
               />
             ))}
           </div>

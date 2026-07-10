@@ -194,6 +194,34 @@ export function getProfile(): Promise<Profile> {
   return authFetch<Profile>("/api/auth/profile/");
 }
 
+export type ProfileUpdatePayload = {
+  name: string;
+  gender: string;
+  phone_number: string;
+  email: string;
+};
+
+export function updateProfile(payload: ProfileUpdatePayload): Promise<Profile> {
+  return authFetch<Profile>("/api/auth/profile/", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export type ChangePasswordPayload = {
+  old_password: string;
+  new_password: string;
+};
+
+// Backend balas 204 No Content tanpa body kalau sukses — authFetch sudah
+// aman menangani ini (res.json() gagal parse ditangkap jadi {}).
+export function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  return authFetch<void>("/api/auth/change-password/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function getRoles(): Promise<RoleInfo[]> {
   return authFetch<RoleInfo[]>("/api/roles/");
 }

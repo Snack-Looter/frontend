@@ -9,7 +9,7 @@ const ITEMS = [
   { href: "/progress", label: "Progres", icon: "query_stats" },
   { href: "/chatbot", label: "AI Chat", icon: "smart_toy" },
   { href: "#", label: "Reward", icon: "military_tech" },
-  { href: "#", label: "Akun", icon: "person" },
+  { href: "/account", label: "Akun", icon: "person" },
 ];
 
 export function BottomNav() {
