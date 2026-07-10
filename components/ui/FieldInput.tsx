@@ -15,7 +15,10 @@ export function FieldInput({
   valid?: boolean;
 } & InputHTMLAttributes<HTMLInputElement>) {
   const [touched, setTouched] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const isPasswordField = inputProps.type === "password";
   const showCheck = touched && valid && !error;
+  const inputType = isPasswordField && isPasswordVisible ? "text" : inputProps.type;
 
   return (
     <label className="flex flex-col gap-1.5">
@@ -23,6 +26,7 @@ export function FieldInput({
       <div className="relative">
         <input
           {...inputProps}
+          type={inputType}
           onBlur={(e) => {
             setTouched(true);
             onBlur?.(e);
@@ -33,15 +37,30 @@ export function FieldInput({
               : valid && touched
                 ? "border-secondary"
                 : "border-border-soft focus:border-primary"
-          } ${className}`}
+          } ${isPasswordField || showCheck ? "pr-14" : ""} ${className}`}
         />
-        {showCheck && (
-          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary-dark animate-pop">
-            <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
-              check_circle
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+          {showCheck && (
+            <span className="text-secondary-dark animate-pop">
+              <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                check_circle
+              </span>
             </span>
-          </span>
-        )}
+          )}
+          {isPasswordField && (
+            <button
+              type="button"
+              onClick={() => setIsPasswordVisible((visible) => !visible)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface-sunken hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={isPasswordVisible ? "Sembunyikan password" : "Tampilkan password"}
+              aria-pressed={isPasswordVisible}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
+                {isPasswordVisible ? "visibility_off" : "visibility"}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
       {error && <span className="font-body text-caption text-danger">{error}</span>}
     </label>
