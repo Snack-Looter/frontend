@@ -52,16 +52,22 @@ export function StickerTag({
   children,
   variant = "warning",
   className = "",
+  onClick,
 }: {
   children: ReactNode;
   variant?: StickerVariant;
   className?: string;
+  onClick?: () => void;
 }) {
-  return (
-    <span
-      className={`absolute -top-3 -right-2 rotate-[-6deg] font-display font-bold text-caption px-3 py-1 rounded-chip border-2.5 border-ink shadow-solid-sm ${STICKER_STYLES[variant]} ${className}`}
-    >
-      {children}
-    </span>
-  );
+  const classes = `absolute -top-3 -right-2 rotate-[-6deg] font-display font-bold text-caption px-3 py-1 rounded-chip border-2.5 border-ink shadow-solid-sm ${STICKER_STYLES[variant]} ${className}`;
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={classes}>
+        {children}
+      </button>
+    );
+  }
+
+  return <span className={classes}>{children}</span>;
 }

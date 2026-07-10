@@ -213,6 +213,20 @@ export function generateMission(roleId: number): Promise<Mission> {
   });
 }
 
+export function getMission(missionId: number): Promise<Mission> {
+  return authFetch<Mission>(`/api/missions/${missionId}/`);
+}
+
+// Mengecek apakah target misi sudah tercapai (dihitung dari transaksi POS
+// asli yang tervalidasi lewat referral_code, bukan dari panggilan ini).
+// Selalu 200 selama mission masih ongoing — status di response bisa tetap
+// "ongoing" kalau target belum tercapai, itu bukan error.
+export function verifyMissionProgress(missionId: number): Promise<Mission> {
+  return authFetch<Mission>(`/api/missions/${missionId}/verify/`, {
+    method: "POST",
+  });
+}
+
 export type BattlePassMilestone = {
   milestone_id: number;
   total_xp_threshold: number;
@@ -232,4 +246,21 @@ export type BattlePassStatus = {
 
 export function getBattlePassStatus(): Promise<BattlePassStatus> {
   return authFetch<BattlePassStatus>("/api/progress/battle-pass/");
+}
+
+// Tab "Progress Role" di Progress Tracker. `roles` cuma berisi role yang
+// benar-benar dimiliki player (satu PlayerRole per baris) — bukan slot kosong.
+export type RoleProgressResponse = {
+  total_xp: number;
+  roles: RoleSummary[];
+};
+
+export function getRoleProgress(): Promise<RoleProgressResponse> {
+  return authFetch<RoleProgressResponse>("/api/progress/roles/");
+}
+
+// Tab "Riwayat Misi". Backend sudah mengecualikan mission ongoing dan
+// mengurutkan terbaru dulu, jadi FE tinggal render apa adanya.
+export function getMissionHistory(): Promise<Mission[]> {
+  return authFetch<Mission[]>("/api/missions/history/");
 }

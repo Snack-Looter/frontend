@@ -6,7 +6,7 @@ import { useIsAuthed } from "@/lib/auth";
 
 const ITEMS = [
   { href: "/home", label: "Beranda", icon: "home" },
-  { href: "#", label: "Progres", icon: "query_stats" },
+  { href: "/progress", label: "Progres", icon: "query_stats" },
   { href: "/chatbot", label: "AI Chat", icon: "smart_toy" },
   { href: "#", label: "Reward", icon: "military_tech" },
   { href: "#", label: "Akun", icon: "person" },
