@@ -221,9 +221,18 @@ export function getMission(missionId: number): Promise<Mission> {
 // asli yang tervalidasi lewat referral_code, bukan dari panggilan ini).
 // Selalu 200 selama mission masih ongoing — status di response bisa tetap
 // "ongoing" kalau target belum tercapai, itu bukan error.
-export function verifyMissionProgress(missionId: number): Promise<Mission> {
+//
+// forceSuccess: override untuk tombol demo "Demo Sukses"/"Demo Gagal" — saat
+// diisi, backend melewati cek transaksi POS asli dan langsung memutuskan
+// completed/failed sesuai nilainya. Dibiarkan undefined untuk verifikasi
+// natural (dipakai lagi begitu integrasi POS jadi satu-satunya sumber).
+export function verifyMissionProgress(
+  missionId: number,
+  forceSuccess?: boolean,
+): Promise<Mission> {
   return authFetch<Mission>(`/api/missions/${missionId}/verify/`, {
     method: "POST",
+    body: forceSuccess === undefined ? undefined : JSON.stringify({ force_success: forceSuccess }),
   });
 }
 

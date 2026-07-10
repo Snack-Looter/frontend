@@ -19,6 +19,7 @@ import {
   generateMission,
   getActiveMission,
   getBattlePassStatus,
+  getMissionHistory,
   getProfile,
   getRoleSummary,
   getRoles,
@@ -60,6 +61,8 @@ export default function HomePage() {
   const [roles, setRoles] = useState<RoleInfo[]>([]);
   const [affiliatorSummary, setAffiliatorSummary] = useState<RoleSummary | null>(null);
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
+  const [lastMission, setLastMission] = useState<Mission | null>(null);
+  const [historyChecked, setHistoryChecked] = useState(false);
   const [battlePass, setBattlePass] = useState<BattlePassStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -87,13 +90,16 @@ export default function HomePage() {
 
         const affiliator = rolesData.find((r) => r.role_name === "Affiliator");
         if (affiliator) {
-          const [summary, activeMissionRes] = await Promise.all([
+          const [summary, activeMissionRes, history] = await Promise.all([
             getRoleSummary(affiliator.role_id),
             getActiveMission(affiliator.role_id),
+            getMissionHistory(),
           ]);
           if (cancelled) return;
           setAffiliatorSummary(summary);
           setActiveMission(activeMissionRes.active_mission);
+          setLastMission(history[0] ?? null);
+          setHistoryChecked(true);
         }
       } catch (err) {
         if (!cancelled) {
@@ -190,7 +196,9 @@ export default function HomePage() {
             <p className="font-body text-body text-ink-soft mt-1">
               {activeMission
                 ? "Misi kamu udah jalan, gaskeun!"
-                : "Yuk mulai misi pertamamu di koperasi."}
+                : historyChecked && lastMission
+                  ? "Siap lanjut ke misi berikutnya?"
+                  : "Yuk mulai misi pertamamu di koperasi."}
             </p>
           </div>
           <span className="w-16 h-16 rounded-full bg-tertiary text-white border-2.5 border-ink shadow-solid-md flex items-center justify-center flex-shrink-0 animate-bounce-in">
@@ -242,152 +250,184 @@ export default function HomePage() {
         </section>
 
         {activeMission ? (
-          <>
-            {/* 4. Mission card — flagship */}
-            <section className="pb-8">
-              <Card variant="hero" className="flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-2">
-                  <Chip variant="success">Sedang Berjalan</Chip>
-                  <Chip
-                    variant={missionUrgent ? "warning" : "neutral"}
-                    className={missionUrgent ? "animate-pulse" : ""}
-                  >
-                    {missionDeadlineDays} Hari Tersisa
-                  </Chip>
-                </div>
-                <h2 className="font-display text-title text-ink">
-                  Jual {activeMission.target_quantity} {activeMission.product_name_snapshot}
-                </h2>
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip variant="earth">Target Rp{formatRupiah(activeMission.target_gmv)}</Chip>
-                  <Chip variant="primary-soft">{activeMission.target_quantity} pcs</Chip>
-                  <Chip variant="success">+{activeMission.xp_reward} XP</Chip>
-                </div>
-                <ProgressBar percent={missionProgressPercent} />
-                <p className="font-body text-caption text-ink-soft">
-                  {activeMission.current_quantity}/{activeMission.target_quantity} terjual
-                </p>
-                <PushButton href={`/mission/${activeMission.mission_id}`} className="w-full mt-1">
-                  Lanjut Misi
-                </PushButton>
-              </Card>
-            </section>
-
-            {/* 5. Ringkasan akun */}
-            <section className="pb-8">
-              <h3 className="font-display text-title text-ink mb-4">Ringkasan Akun</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <StatTile
-                  label="Misi Selesai"
-                  value={affiliatorSummary?.mission_completed_count ?? 0}
-                  icon={
-                    <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
-                      task_alt
-                    </span>
-                  }
-                />
-                <StatTile
-                  label="Misi Gagal"
-                  value={affiliatorSummary?.mission_failed_count ?? 0}
-                  icon={
-                    <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
-                      cancel
-                    </span>
-                  }
-                />
-                <StatTile
-                  label="Reward Diklaim"
-                  value={rewardsRedeemed}
-                  icon={
-                    <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
-                      redeem
-                    </span>
-                  }
-                />
-                <StatTile
-                  label="Role Aktif"
-                  value={roleActiveCount}
-                  icon={
-                    <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
-                      diversity_3
-                    </span>
-                  }
-                />
-              </div>
-            </section>
-
-            {/* 6. AI Assistant banner */}
-            <section className="pb-8">
-              <div className="bg-primary text-white border-2.5 border-ink rounded-card shadow-solid-md p-5 flex items-center gap-4">
-                <span className="w-14 h-14 rounded-full bg-white text-primary border-2.5 border-ink flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-rounded" style={{ fontSize: 28 }}>
-                    psychology
-                  </span>
-                </span>
-                <div className="flex-1">
-                  <p className="font-display text-title-sm">Bingung strategi jualan? Tanya aku!</p>
-                  <PushButton
-                    href="/chatbot"
-                    className="!bg-white !text-primary !shadow-solid-sm active:!shadow-none mt-2 !px-4 !py-2"
-                  >
-                    Tanya AI Assistant
-                  </PushButton>
-                </div>
-              </div>
-            </section>
-          </>
-        ) : (
-          <>
-            {/* 4. Empty state mission */}
-            <section className="pb-8">
-              <Card variant="hero" className="text-center flex flex-col items-center gap-3">
-                <StickerTag>MULAI DI SINI!</StickerTag>
-                <span className="w-20 h-20 rounded-full bg-primary text-white border-3 border-ink shadow-solid-md flex items-center justify-center animate-bounce-in">
-                  <span className="material-symbols-rounded" style={{ fontSize: 40 }}>
-                    rocket_launch
-                  </span>
-                </span>
-                <h2 className="font-display text-title text-ink">Misi pertamamu nunggu nih!</h2>
-                <p className="font-body text-body text-ink-soft">
-                  Sebagai Affiliator, kamu bakal jualan produk koperasi dan dapet XP tiap kali
-                  berhasil.
-                </p>
-                <PushButton
-                  onClick={handleFindMission}
-                  loading={generating}
-                  disabled={!affiliatorRoleId}
-                  icon={
-                    <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
-                      search
-                    </span>
-                  }
-                  className="w-full mt-1"
+          /* 4. Mission card — flagship */
+          <section className="pb-8">
+            <Card variant="hero" className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-2">
+                <Chip variant="success">Sedang Berjalan</Chip>
+                <Chip
+                  variant={missionUrgent ? "warning" : "neutral"}
+                  className={missionUrgent ? "animate-pulse" : ""}
                 >
-                  Cari Misi
-                </PushButton>
-              </Card>
-            </section>
-
-            {/* 5. Preview role lain */}
-            <section className="pb-8">
-              <h3 className="font-display text-title text-ink mb-4">
-                Role yang bisa kamu buka nanti
-              </h3>
-              <div className="grid gap-4">
-                {KNOWN_ROLES.filter((r) => r.name !== "Affiliator").map((role) => (
-                  <RoleCard
-                    key={role.name}
-                    locked
-                    onClick={handleLockedRoleTap}
-                    color={role.color}
-                    name={role.name}
-                    description={role.description}
-                    icon={<span className="material-symbols-rounded">{role.icon}</span>}
-                  />
-                ))}
+                  {missionDeadlineDays} Hari Tersisa
+                </Chip>
               </div>
-            </section>
-          </>
+              <h2 className="font-display text-title text-ink">
+                Jual {activeMission.target_quantity} {activeMission.product_name_snapshot}
+              </h2>
+              <div className="flex flex-wrap gap-1.5">
+                <Chip variant="earth">Target Rp{formatRupiah(activeMission.target_gmv)}</Chip>
+                <Chip variant="primary-soft">{activeMission.target_quantity} pcs</Chip>
+                <Chip variant="success">+{activeMission.xp_reward} XP</Chip>
+              </div>
+              <ProgressBar percent={missionProgressPercent} />
+              <p className="font-body text-caption text-ink-soft">
+                {activeMission.current_quantity}/{activeMission.target_quantity} terjual
+              </p>
+              <PushButton href={`/mission/${activeMission.mission_id}`} className="w-full mt-1">
+                Lanjut Misi
+              </PushButton>
+            </Card>
+          </section>
+        ) : (
+          /* 4. Empty state mission — beda copy first-time vs returning */
+          <section className="pb-8">
+            <Card variant="hero" className="text-center flex flex-col items-center gap-3">
+              {historyChecked && lastMission ? (
+                <>
+                  <StickerTag>LANJUT LAGI!</StickerTag>
+                  <span className="w-20 h-20 rounded-full bg-primary text-white border-3 border-ink shadow-solid-md flex items-center justify-center animate-bounce-in">
+                    <span className="material-symbols-rounded" style={{ fontSize: 40 }}>
+                      {lastMission.status === "completed" ? "celebration" : "favorite"}
+                    </span>
+                  </span>
+                  <h2 className="font-display text-title text-ink">
+                    {lastMission.status === "completed" ? "Mantap, lanjut lagi!" : "Jangan nyerah!"}
+                  </h2>
+                  <p className="font-body text-body text-ink-soft">
+                    {lastMission.status === "completed"
+                      ? `Mantap! Misi terakhir kamu berhasil, +${lastMission.xp_reward} XP masuk 🎉 Lanjut lagi yuk!`
+                      : "Belum berhasil kali ini, tapi jangan nyerah! Coba misi berikutnya yuk 💪"}
+                  </p>
+                  <PushButton
+                    onClick={handleFindMission}
+                    loading={generating}
+                    disabled={!affiliatorRoleId}
+                    icon={
+                      <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                        search
+                      </span>
+                    }
+                    className="w-full mt-1"
+                  >
+                    Cari Misi Lagi
+                  </PushButton>
+                </>
+              ) : (
+                <>
+                  <StickerTag>MULAI DI SINI!</StickerTag>
+                  <span className="w-20 h-20 rounded-full bg-primary text-white border-3 border-ink shadow-solid-md flex items-center justify-center animate-bounce-in">
+                    <span className="material-symbols-rounded" style={{ fontSize: 40 }}>
+                      rocket_launch
+                    </span>
+                  </span>
+                  <h2 className="font-display text-title text-ink">Misi pertamamu nunggu nih!</h2>
+                  <p className="font-body text-body text-ink-soft">
+                    Sebagai Affiliator, kamu bakal jualan produk koperasi dan dapet XP tiap kali
+                    berhasil.
+                  </p>
+                  <PushButton
+                    onClick={handleFindMission}
+                    loading={generating}
+                    disabled={!affiliatorRoleId}
+                    icon={
+                      <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                        search
+                      </span>
+                    }
+                    className="w-full mt-1"
+                  >
+                    Cari Misi
+                  </PushButton>
+                </>
+              )}
+            </Card>
+          </section>
+        )}
+
+        {/* 5. Ringkasan akun — selalu tampil, terlepas dari state mission */}
+        <section className="pb-8">
+          <h3 className="font-display text-title text-ink mb-4">Ringkasan Akun</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <StatTile
+              label="Misi Selesai"
+              value={affiliatorSummary?.mission_completed_count ?? 0}
+              icon={
+                <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
+                  task_alt
+                </span>
+              }
+            />
+            <StatTile
+              label="Misi Gagal"
+              value={affiliatorSummary?.mission_failed_count ?? 0}
+              icon={
+                <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
+                  cancel
+                </span>
+              }
+            />
+            <StatTile
+              label="Reward Diklaim"
+              value={rewardsRedeemed}
+              icon={
+                <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
+                  redeem
+                </span>
+              }
+            />
+            <StatTile
+              label="Role Aktif"
+              value={roleActiveCount}
+              icon={
+                <span className="material-symbols-rounded" style={{ fontSize: 15 }}>
+                  diversity_3
+                </span>
+              }
+            />
+          </div>
+        </section>
+
+        {/* 6. AI Assistant banner — selalu tampil, terlepas dari state mission */}
+        <section className="pb-8">
+          <div className="bg-primary text-white border-2.5 border-ink rounded-card shadow-solid-md p-5 flex items-center gap-4">
+            <span className="w-14 h-14 rounded-full bg-white text-primary border-2.5 border-ink flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-rounded" style={{ fontSize: 28 }}>
+                psychology
+              </span>
+            </span>
+            <div className="flex-1">
+              <p className="font-display text-title-sm">Bingung strategi jualan? Tanya aku!</p>
+              <PushButton
+                href="/chatbot"
+                className="!bg-white !text-primary !shadow-solid-sm active:!shadow-none mt-2 !px-4 !py-2"
+              >
+                Tanya AI Assistant
+              </PushButton>
+            </div>
+          </div>
+        </section>
+
+        {!activeMission && (
+          /* 7. Preview role lain — cuma relevan saat lagi idle (belum ada mission jalan) */
+          <section className="pb-8">
+            <h3 className="font-display text-title text-ink mb-4">
+              Role yang bisa kamu buka nanti
+            </h3>
+            <div className="grid gap-4">
+              {KNOWN_ROLES.filter((r) => r.name !== "Affiliator").map((role) => (
+                <RoleCard
+                  key={role.name}
+                  locked
+                  onClick={handleLockedRoleTap}
+                  color={role.color}
+                  name={role.name}
+                  description={role.description}
+                  icon={<span className="material-symbols-rounded">{role.icon}</span>}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </main>
 

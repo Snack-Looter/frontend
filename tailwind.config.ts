@@ -66,6 +66,7 @@ const config: Config = {
         "press-primary": "0 4px 0 0 #3730A3",
         "press-secondary": "0 4px 0 0 #047857",
         "press-tertiary": "0 4px 0 0 #7C3000",
+        "press-danger": "0 4px 0 0 #991B1B",
       },
     },
   },

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type PushButtonVariant = "primary" | "secondary" | "tertiary" | "ghost";
+export type PushButtonVariant = "primary" | "secondary" | "tertiary" | "danger" | "ghost";
 export type PushButtonSize = "sm" | "md" | "lg";
 
 const VARIANT_STYLES: Record<PushButtonVariant, string> = {
   primary: "bg-primary text-white shadow-press-primary",
   secondary: "bg-secondary text-white shadow-press-secondary",
   tertiary: "bg-tertiary text-white shadow-press-tertiary",
+  danger: "bg-danger text-white shadow-press-danger",
   ghost: "bg-surface-card text-ink shadow-solid-md",
 };
 

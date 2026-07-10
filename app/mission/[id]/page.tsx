@@ -30,7 +30,7 @@ export default function MissionDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [celebrating, setCelebrating] = useState(false);
+  const [outcome, setOutcome] = useState<"success" | "fail" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,17 +62,16 @@ export default function MissionDetailPage() {
     };
   }, [missionId]);
 
-  async function handleVerify() {
+  async function handleVerify(forceSuccess?: boolean) {
     if (!mission) return;
     setVerifying(true);
     try {
-      const updated = await verifyMissionProgress(mission.mission_id);
-      const justCompleted = mission.status === "ongoing" && updated.status === "completed";
+      const updated = await verifyMissionProgress(mission.mission_id, forceSuccess);
       setMission(updated);
-      if (justCompleted) {
-        setCelebrating(true);
+      if (updated.status === "completed") {
+        setOutcome("success");
       } else if (updated.status === "failed") {
-        showToast("Misi ini sudah kadaluarsa.", "danger");
+        setOutcome("fail");
       } else {
         showToast("Target belum tercapai, terus semangat jualan!", "info");
       }
@@ -83,8 +82,18 @@ export default function MissionDetailPage() {
     }
   }
 
+  async function handleCopyReferralCode() {
+    if (!mission) return;
+    try {
+      await navigator.clipboard.writeText(mission.referral_code);
+      showToast("Kode referral disalin!", "success");
+    } catch {
+      showToast("Gagal menyalin kode.", "danger");
+    }
+  }
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-surface text-ink font-body text-body">
+    <div className="h-screen flex flex-col overflow-hidden bg-surface text-ink font-body text-body max-w-app mx-auto">
       {/* Header */}
       <header className="flex-shrink-0 flex items-center gap-2 h-16 px-md border-b-2 border-ink">
         <button
@@ -98,7 +107,7 @@ export default function MissionDetailPage() {
         <h1 className="font-display text-title-sm text-ink">Detail Misi</h1>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-md py-5 max-w-app mx-auto w-full">
+      <div className="flex-1 overflow-y-auto px-md py-5">
         {loading && (
           <p className="font-body text-body text-ink-soft text-center mt-12">Memuat misi...</p>
         )}
@@ -199,6 +208,31 @@ export default function MissionDetailPage() {
               </p>
             </Card>
 
+            {/* Kode Referral — cuma relevan selama mission masih ongoing */}
+            {mission.status === "ongoing" && (
+              <div className="border-2.5 border-ink rounded-card bg-surface-card p-4 mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-body text-caption text-ink-soft mb-1">Kode Referral</p>
+                  <p className="font-display text-title text-primary tracking-[0.3em]">
+                    {mission.referral_code}
+                  </p>
+                  <p className="font-body text-caption text-ink-soft mt-1">
+                    Tunjukkan kode ini ke kasir saat belanja di koperasi.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyReferralCode}
+                  aria-label="Salin kode referral"
+                  className="w-10 h-10 rounded-full bg-surface-sunken border-2 border-ink flex items-center justify-center flex-shrink-0 active:translate-y-0.5 transition-transform duration-100"
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: 18 }}>
+                    content_copy
+                  </span>
+                </button>
+              </div>
+            )}
+
             {/* AI helper — satu baris ramping */}
             <Link
               href="/chatbot"
@@ -257,9 +291,37 @@ export default function MissionDetailPage() {
       {!loading && mission && (
         <div className="flex-shrink-0 border-t-2.5 border-ink bg-surface p-md">
           {mission.status === "ongoing" ? (
-            <PushButton onClick={handleVerify} loading={verifying} className="w-full">
-              Verifikasi Progress
-            </PushButton>
+            <div className="flex flex-col gap-3">
+              <PushButton onClick={() => handleVerify()} loading={verifying} className="w-full">
+                Verifikasi Progress
+              </PushButton>
+
+              <div className="border-2 border-dashed border-border-soft rounded-button bg-surface-sunken p-3 flex flex-col gap-2">
+                <p className="font-body text-caption text-ink-soft text-center font-semibold">
+                  Panel Demo — pilih hasil untuk simulasi tanpa transaksi asli
+                </p>
+                <div className="flex gap-3">
+                  <PushButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleVerify(true)}
+                    loading={verifying}
+                    className="flex-1"
+                  >
+                    ✅ Demo Sukses
+                  </PushButton>
+                  <PushButton
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleVerify(false)}
+                    loading={verifying}
+                    className="flex-1"
+                  >
+                    ❌ Demo Gagal
+                  </PushButton>
+                </div>
+              </div>
+            </div>
           ) : (
             <p className="font-body text-body-strong text-ink-soft text-center py-2">
               {mission.status === "completed"
@@ -270,12 +332,12 @@ export default function MissionDetailPage() {
         </div>
       )}
 
-      {/* Celebration overlay saat verify berhasil menyelesaikan misi */}
-      {celebrating && mission && (
+      {/* Hasil demo sukses — tetap di halaman, navigasi ke Home dikontrol manual lewat tombol Lanjut */}
+      {outcome === "success" && mission && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-md">
           <div
             className="absolute inset-0 bg-ink/50 animate-overlay-in"
-            onClick={() => setCelebrating(false)}
+            onClick={() => setOutcome(null)}
           />
           <div className="relative w-full max-w-[24rem]">
             <CelebrationOverlay
@@ -288,10 +350,36 @@ export default function MissionDetailPage() {
               subtitle="Target tercapai, kerja bagus!"
               xp={mission.xp_reward}
             >
-              <PushButton className="w-full mt-4" onClick={() => setCelebrating(false)}>
-                Lihat Detail
+              <PushButton className="w-full mt-4" onClick={() => router.push("/home")}>
+                Lanjut
               </PushButton>
             </CelebrationOverlay>
+          </div>
+        </div>
+      )}
+
+      {/* Hasil demo gagal — nada tetap positif, bukan menghukum */}
+      {outcome === "fail" && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-md">
+          <div
+            className="absolute inset-0 bg-ink/50 animate-overlay-in"
+            onClick={() => setOutcome(null)}
+          />
+          <div className="relative w-full max-w-[24rem]">
+            <div className="relative bg-surface-card border-3 border-ink rounded-card shadow-solid-lg p-8 flex flex-col items-center text-center gap-3 animate-card-in">
+              <span className="w-20 h-20 rounded-full bg-tertiary-light text-tertiary-dark border-3 border-ink shadow-solid-md flex items-center justify-center">
+                <span className="material-symbols-rounded" style={{ fontSize: 40 }}>
+                  sentiment_neutral
+                </span>
+              </span>
+              <h2 className="font-display text-title text-ink">Belum Berhasil</h2>
+              <p className="font-body text-body text-ink-soft">
+                Belum berhasil kali ini, coba misi berikutnya!
+              </p>
+              <PushButton className="w-full mt-4" onClick={() => router.push("/home")}>
+                Lanjut
+              </PushButton>
+            </div>
           </div>
         </div>
       )}
