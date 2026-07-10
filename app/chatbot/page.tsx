@@ -15,6 +15,13 @@ type ChatMessage = {
   text: string;
 };
 
+const SUGGESTIONS = [
+  { icon: "campaign", text: "Gimana cara promosi produk koperasi?" },
+  { icon: "trending_up", text: "Kasih tips jualan buat pemula dong" },
+  { icon: "lightbulb", text: "Ide konten promosi yang menarik apa?" },
+  { icon: "flag", text: "Strategi capai target misi minggu ini?" },
+];
+
 export default function ChatbotPage() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [checkedAuth, setCheckedAuth] = useState(false);
@@ -49,16 +56,16 @@ export default function ChatbotPage() {
       saveTokens(tokens);
       setIsAuthed(true);
     } catch (err) {
-      setLoginError(
-        err instanceof ApiError ? err.message : "Gagal login. Coba lagi."
-      );
+      setLoginError(err instanceof ApiError ? err.message : "Gagal login. Coba lagi.");
     } finally {
       setLoginLoading(false);
     }
   }
 
-  async function handleSend() {
-    const text = input.trim();
+  // `override` dipakai suggestion chip supaya bisa langsung kirim tanpa
+  // menunggu state `input` ter-update dulu.
+  async function handleSend(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || sending) return;
 
     setMessages((prev) => [...prev, { role: "user", text }]);
@@ -74,13 +81,17 @@ export default function ChatbotPage() {
         setIsAuthed(false);
         setChatError("Sesi berakhir, silakan login lagi.");
       } else {
-        setChatError(
-          err instanceof ApiError ? err.message : "Gagal menghubungi chatbot."
-        );
+        setChatError(err instanceof ApiError ? err.message : "Gagal menghubungi chatbot.");
       }
     } finally {
       setSending(false);
     }
+  }
+
+  function handleReset() {
+    setMessages([]);
+    setChatError(null);
+    setInput("");
   }
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -110,13 +121,13 @@ export default function ChatbotPage() {
           </div>
         ) : (
           <>
+            <ChatIdentityBar onReset={handleReset} canReset={messages.length > 0} />
+
             <div className="flex-1 overflow-y-auto px-md">
               {messages.length === 0 ? (
-                <div className="h-full flex items-center justify-center">
-                  <EmptyState />
-                </div>
+                <EmptyState onPick={(t) => handleSend(t)} />
               ) : (
-                <div className="flex flex-col gap-4 py-6">
+                <div className="flex flex-col gap-4 py-5">
                   {messages.map((m, i) => (
                     <MessageBubble key={i} message={m} />
                   ))}
@@ -132,20 +143,26 @@ export default function ChatbotPage() {
             <div className="flex-shrink-0 px-md pt-2">
               <div className="flex flex-col gap-2">
                 {chatError && (
-                  <p className="font-body text-label text-danger px-2">{chatError}</p>
+                  <p className="font-body text-label text-danger px-2 flex items-center gap-1">
+                    <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
+                      error
+                    </span>
+                    {chatError}
+                  </p>
                 )}
                 <div className="flex items-end gap-2 bg-surface-card border-2.5 border-border-soft focus-within:border-primary rounded-button shadow-solid-sm p-2 transition-colors">
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleInputKeyDown}
-                    className="flex-grow bg-transparent border-none focus:ring-0 resize-none font-body text-body text-ink placeholder-neutral min-h-[48px] max-h-32 py-3 px-2"
+                    className="flex-grow bg-transparent border-none focus:ring-0 focus:outline-none resize-none font-body text-body text-ink placeholder-neutral min-h-[48px] max-h-32 py-3 px-2"
                     placeholder="Tulis pertanyaanmu..."
                     rows={1}
                   />
                   <button
-                    onClick={handleSend}
+                    onClick={() => handleSend()}
                     disabled={sending || !input.trim()}
+                    aria-label="Kirim pesan"
                     className="bg-primary text-white w-12 h-12 rounded-full border-2.5 border-ink flex items-center justify-center shadow-press-primary active:translate-y-1 active:shadow-none transition-all duration-100 flex-shrink-0 mb-0.5 disabled:bg-surface-sunken disabled:text-neutral disabled:border-border-soft disabled:shadow-none"
                   >
                     <span
@@ -167,38 +184,115 @@ export default function ChatbotPage() {
   );
 }
 
-function EmptyState() {
+// Avatar bot dipakai di identity bar, bubble, dan typing indicator.
+function BotAvatar({ size = 32, ring = false }: { size?: number; ring?: boolean }) {
   return (
-    <div className="w-full flex flex-col items-center text-center mt-12">
-      <div
-        className="w-48 h-48 mb-8 rounded-full bg-surface-sunken flex items-center justify-center relative overflow-hidden bg-cover bg-center border-2.5 border-ink shadow-solid-md"
-        style={{
-          backgroundImage:
-            "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB20akA2BAbVwD-yGNPldRQMjbuWeuXEuSDkRKWo8MkMYGnF26eMedHwhVy3Vcw4L6pEOe4JLSlMxU5dwtnav5SYKjdQi1clkeUJfIk0jz4oZ9efWIVT11Uj9QbDJ2XXp6As-xQch-F9ORoSd5T6Zab6aKgMfXs4lUKcExL6z9nS11_Oe9a78OlEOzzjlvJkB-3toptmXszgTAoGAhas7lJjgnISeIFwj_iBuivnJq4Nyyi29Pf120-Xw')",
-        }}
-      />
-      <Card className="mb-8 w-full">
-        <h2 className="font-display text-title text-ink mb-2">AI Mission Assistant</h2>
-        <p className="font-body text-body text-ink-soft">
-          Ajukan pertanyaan seputar misi, promosi, strategi pemasaran, atau hal
-          lain yang dapat membantumu menyelesaikan misi.
+    <span
+      className={`rounded-full bg-primary text-white border-2 border-ink flex items-center justify-center flex-shrink-0 ${
+        ring ? "shadow-press-primary" : ""
+      }`}
+      style={{ width: size, height: size }}
+    >
+      <span
+        className="material-symbols-rounded"
+        style={{ fontVariationSettings: "'FILL' 1", fontSize: Math.round(size * 0.56) }}
+      >
+        smart_toy
+      </span>
+    </span>
+  );
+}
+
+function ChatIdentityBar({ onReset, canReset }: { onReset: () => void; canReset: boolean }) {
+  return (
+    <div className="flex-shrink-0 flex items-center gap-3 px-md py-3 border-b-2 border-border-soft bg-surface">
+      <span className="relative">
+        <BotAvatar size={44} ring />
+        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-secondary border-2 border-surface" />
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="font-display text-title-sm text-ink leading-tight">Asisten Misi AI</p>
+        <p className="font-body text-caption text-secondary-dark font-semibold flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+          Online · siap bantu misimu
         </p>
-      </Card>
+      </div>
+      {canReset && (
+        <button
+          type="button"
+          onClick={onReset}
+          aria-label="Mulai obrolan baru"
+          className="w-10 h-10 rounded-full border-2 border-border-soft text-ink-soft flex items-center justify-center hover:border-primary hover:text-primary active:scale-90 transition-all duration-100 flex-shrink-0"
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+            edit_square
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ onPick }: { onPick: (text: string) => void }) {
+  return (
+    <div className="min-h-full flex flex-col items-center justify-center text-center py-8">
+      <span className="w-24 h-24 rounded-full bg-primary text-white border-3 border-ink shadow-solid-lg flex items-center justify-center animate-bounce-in">
+        <span
+          className="material-symbols-rounded"
+          style={{ fontVariationSettings: "'FILL' 1", fontSize: 52 }}
+        >
+          smart_toy
+        </span>
+      </span>
+      <h2 className="font-display text-title text-ink mt-5">Halo! Aku asistenmu 🤖</h2>
+      <p className="font-body text-body text-ink-soft mt-2 max-w-[17rem]">
+        Tanya apa aja soal misi, promosi, atau strategi jualan di koperasi. Aku bantu semampuku!
+      </p>
+
+      <div className="w-full flex flex-col gap-2.5 mt-7">
+        <p className="font-body text-caption font-semibold text-neutral text-left px-1">
+          Coba mulai dari sini
+        </p>
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s.text}
+            type="button"
+            onClick={() => onPick(s.text)}
+            className="flex items-center gap-3 w-full text-left bg-surface-card border-2.5 border-ink rounded-button p-3 shadow-solid-sm active:translate-y-0.5 active:shadow-none transition-all duration-100"
+          >
+            <span className="w-9 h-9 rounded-full bg-primary-light text-primary border-2 border-ink flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                {s.icon}
+              </span>
+            </span>
+            <span className="font-body text-label font-semibold text-ink flex-1">{s.text}</span>
+            <span className="material-symbols-rounded text-neutral flex-shrink-0" style={{ fontSize: 18 }}>
+              arrow_outward
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+
+  if (isUser) {
+    return (
+      <div className="flex justify-end animate-slide-in-right">
+        <div className="max-w-[80%] bg-primary text-white border-2.5 border-ink rounded-card rounded-br-chip shadow-solid-sm px-4 py-3 whitespace-pre-wrap font-body text-body">
+          {message.text}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[80%] rounded-card border-2 border-ink px-4 py-3 whitespace-pre-wrap font-body text-body ${
-          isUser
-            ? "bg-primary text-white rounded-br-chip"
-            : "bg-surface-card text-ink rounded-bl-chip"
-        }`}
-      >
+    <div className="flex justify-start items-end gap-2 animate-slide-in-left">
+      <BotAvatar size={32} />
+      <div className="max-w-[80%] bg-surface-card text-ink border-2.5 border-ink rounded-card rounded-bl-chip shadow-solid-sm px-4 py-3 whitespace-pre-wrap font-body text-body">
         {message.text}
       </div>
     </div>
@@ -207,9 +301,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
 function TypingBubble() {
   return (
-    <div className="flex justify-start">
-      <div className="bg-surface-card text-ink-soft border-2 border-ink rounded-card rounded-bl-chip px-4 py-3 font-body text-body">
-        Mengetik...
+    <div className="flex justify-start items-end gap-2 animate-slide-in-left">
+      <BotAvatar size={32} />
+      <div className="bg-surface-card border-2.5 border-ink rounded-card rounded-bl-chip shadow-solid-sm px-4 py-4 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-neutral typing-dot" />
+        <span className="w-2 h-2 rounded-full bg-neutral typing-dot" style={{ animationDelay: "0.15s" }} />
+        <span className="w-2 h-2 rounded-full bg-neutral typing-dot" style={{ animationDelay: "0.3s" }} />
       </div>
     </div>
   );
@@ -235,10 +332,16 @@ function LoginGate({
   return (
     <div className="w-full max-w-[24rem] mt-16">
       <Card animate>
-        <h2 className="font-display text-title text-ink mb-2">Masuk dulu</h2>
-        <p className="font-body text-body text-ink-soft mb-4">
-          Masuk diperlukan untuk mengobrol dengan AI Mission Assistant.
-        </p>
+        <div className="flex flex-col items-center text-center mb-4">
+          <span className="relative mb-3">
+            <BotAvatar size={56} ring />
+            <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-secondary border-2 border-surface-card" />
+          </span>
+          <h2 className="font-display text-title text-ink">Masuk dulu yuk</h2>
+          <p className="font-body text-body text-ink-soft mt-1">
+            Masuk buat mulai ngobrol sama Asisten Misi AI.
+          </p>
+        </div>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <FieldInput
             label="Email"
