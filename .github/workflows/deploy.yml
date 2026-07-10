@@ -1,0 +1,71 @@
+name: Deploy Frontend to Cloud Run
+
+on:
+  push:
+    branches:
+      - development
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-southeast2
+  SERVICE_NAME: frontend-app
+  BACKEND_SERVICE_NAME: backend-api
+  IMAGE_URL: asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-source-deploy/frontend-app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      # Cloud Run URLs aren't fixed strings, so the backend's live URL is looked
+      # up here instead of hardcoding it. The backend-api service must already
+      # exist (deploy it at least once before the first frontend deploy).
+      - name: Resolve backend Cloud Run URL
+        id: backend
+        run: |
+          URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE_NAME }} \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          if [ -z "$URL" ]; then
+            echo "Backend service '${{ env.BACKEND_SERVICE_NAME }}' not found in region ${{ env.REGION }}. Deploy the backend first." >&2
+            exit 1
+          fi
+          echo "Resolved backend URL: $URL"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ steps.backend.outputs.url }} \
+            -t ${{ env.IMAGE_URL }}:${{ github.sha }} \
+            .
+
+      - name: Push Docker image
+        run: docker push ${{ env.IMAGE_URL }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image=${{ env.IMAGE_URL }}:${{ github.sha }} \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=3000
