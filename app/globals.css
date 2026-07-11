@@ -4,6 +4,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Backdrop di luar kolom aplikasi 430px — hanya terlihat di layar yang lebih
+     lebar dari mobile. Membuat kolom tampak "ter-bingkai" seperti layar HP,
+     supaya jelas KopQuest adalah pengalaman mobile-first. */
+  --app-backdrop: #e6e3f2;
 }
 
 @theme inline {
@@ -13,17 +18,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Sengaja TIDAK mengikuti prefers-color-scheme: UI aplikasi belum dirancang
+   untuk mode gelap, jadi backdrop dikunci terang agar tidak berubah hitam.
+   (Sebelumnya rule body bawaan Next membuat area luar kolom jadi putih/hitam.) */
 body {
-  background: var(--background);
+  background: var(--app-backdrop);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 @keyframes slide-in-right {

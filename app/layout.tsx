@@ -48,8 +48,15 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-surface font-body text-body">
-        <ToastProvider>{children}</ToastProvider>
+      <body className="min-h-full flex flex-col font-body text-body">
+        <ToastProvider>
+          {/* App frame: kunci SEMUA halaman ke lebar kolom mobile (max-w-app = 430px)
+              dan pusatkan. Di desktop, area di luar kolom menampilkan --app-backdrop
+              sehingga tampak seperti layar HP; di HP kolom mengisi penuh layar. */}
+          <div className="mx-auto w-full max-w-app min-h-screen bg-surface shadow-[0_0_60px_rgba(30,27,58,0.14)]">
+            {children}
+          </div>
+        </ToastProvider>
       </body>
     </html>
   );

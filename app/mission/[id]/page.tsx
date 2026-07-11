@@ -94,7 +94,7 @@ export default function MissionDetailPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-surface text-ink font-body text-body max-w-app mx-auto">
+    <div className="h-screen flex flex-col overflow-hidden bg-surface text-ink font-body text-body max-w-app mx-auto w-full">
       {/* Header */}
       <header className="flex-shrink-0 flex items-center gap-2 h-16 px-md border-b-2 border-ink">
         <button

@@ -185,7 +185,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-surface text-ink font-body text-body min-h-screen flex flex-col">
       <AppHeader />
-      <main className="flex-grow pt-16 pb-28 max-w-app mx-auto w-full">{children}</main>
+      <main className="flex-grow pt-16 pb-24 max-w-app mx-auto w-full">{children}</main>
       <BottomNav />
     </div>
   );

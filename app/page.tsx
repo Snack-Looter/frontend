@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
+import { MobileExperienceNotice } from "@/components/MobileExperienceNotice";
 import { PushButton } from "@/components/ui/PushButton";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -252,6 +253,7 @@ export default function Home() {
       </main>
 
       <BottomNav />
+      <MobileExperienceNotice />
     </div>
   );
 }
