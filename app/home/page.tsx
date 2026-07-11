@@ -244,9 +244,6 @@ export default function HomePage() {
             </span>
             <span className="material-symbols-rounded">expand_more</span>
           </button>
-          <p className="font-body text-caption text-neutral text-center mt-2">
-            Role lain nyusul — fokus dulu di Affiliator!
-          </p>
         </section>
 
         {activeMission ? (

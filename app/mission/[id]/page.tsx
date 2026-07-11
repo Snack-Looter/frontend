@@ -164,7 +164,7 @@ export default function MissionDetailPage() {
                 }
                 className="cursor-pointer"
               >
-                Dibuat AI ✨
+                Dibuat ML ✨
               </StickerTag>
 
               <div className="flex flex-wrap gap-1.5">
@@ -298,7 +298,7 @@ export default function MissionDetailPage() {
 
               <div className="border-2 border-dashed border-border-soft rounded-button bg-surface-sunken p-3 flex flex-col gap-2">
                 <p className="font-body text-caption text-ink-soft text-center font-semibold">
-                  Panel Demo — pilih hasil untuk simulasi tanpa transaksi asli
+                  pilih hasil untuk simulasi tanpa transaksi asli
                 </p>
                 <div className="flex gap-3">
                   <PushButton
@@ -308,7 +308,7 @@ export default function MissionDetailPage() {
                     loading={verifying}
                     className="flex-1"
                   >
-                    ✅ Demo Sukses
+                    Demo Sukses
                   </PushButton>
                   <PushButton
                     variant="danger"
@@ -317,7 +317,7 @@ export default function MissionDetailPage() {
                     loading={verifying}
                     className="flex-1"
                   >
-                    ❌ Demo Gagal
+                    Demo Gagal
                   </PushButton>
                 </div>
               </div>

@@ -93,7 +93,7 @@ export default function Home() {
             selesai menambah XP, menaikkan level, dan mendekatkanmu ke hadiah
             asli.
           </p>
-          <PushButton href="/chatbot" size="lg" className="mt-2">
+          <PushButton href="/register" size="lg" className="mt-2">
             Mulai misi pertamamu
           </PushButton>
         </section>
@@ -163,14 +163,19 @@ export default function Home() {
 
         {/* 5. Progress & Reward preview */}
         <section className="py-10">
-          <h3 className="font-display text-title text-center mb-6">Progresmu, Hadiah Nyata</h3>
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+          <Card className="flex flex-col items-center text-center gap-3">
+            <span className="w-16 h-16 rounded-full bg-secondary text-white border-2.5 border-ink shadow-press-secondary flex items-center justify-center">
+              <span className="material-symbols-rounded" style={{ fontSize: 32 }}>
+                award_star
+              </span>
+            </span>
+            <h3 className="font-display text-title text-ink">Progresmu, Hadiah Nyata</h3>
+            <div className="w-full flex items-center justify-between gap-3">
               <Chip variant="level">Level 3</Chip>
               <span className="font-display text-stat text-secondary-dark">+50 XP</span>
             </div>
             <ProgressBar percent={65} />
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {REWARDS.map((r) => (
                 <Chip key={r} variant="success">
                   {r}
@@ -178,13 +183,6 @@ export default function Home() {
               ))}
             </div>
           </Card>
-        </section>
-
-        {/* 6. Closing CTA */}
-        <section className="py-14 text-center">
-          <PushButton href="/chatbot" size="lg">
-            Mulai misi pertamamu
-          </PushButton>
         </section>
       </main>
 
