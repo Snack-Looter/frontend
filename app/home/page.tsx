@@ -192,7 +192,7 @@ export default function HomePage() {
         <section className="pt-8 pb-6 flex items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-display text-ink">
-              Halo, {profile?.name.split(" ")[0] ?? "Sobat"}! 👋
+              Halo, {profile?.name.split(" ")[0] ?? "Sobat"}!
             </h1>
             <p className="font-body text-body text-ink-soft mt-1">
               {activeMission

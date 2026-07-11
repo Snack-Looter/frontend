@@ -65,34 +65,101 @@ export default function Home() {
       <AppHeader />
 
       <main className="flex-grow pt-16 pb-24 max-w-app mx-auto w-full px-md">
-        {/* 1. Hero */}
-        <section className="pt-12 pb-14 flex flex-col items-center text-center gap-5">
-          <div className="flex items-end justify-center">
-            <img
-              src="/mascot-content-creator.png"
-              alt="Maskot Content Creator"
-              className="w-16 h-16 -mr-3 rotate-[-8deg] rounded-full border-2.5 border-ink object-cover shadow-solid-sm"
-            />
-            <img
-              src="/mascot-affiliator.png"
-              alt="Maskot Affiliator KopQuest"
-              className="w-24 h-24 rounded-full border-2.5 border-ink object-cover shadow-solid-sm z-10"
-            />
-            <img
-              src="/mascot-duta-sebaya.jpg"
-              alt="Maskot Duta Sebaya"
-              className="w-16 h-16 -ml-3 rotate-[8deg] rounded-full border-2.5 border-ink object-cover shadow-solid-sm"
-            />
+        {/* 1. Hero — "Mission Board": semua visual dari CSS/HTML, tanpa gambar maskot */}
+        <section className="relative pt-12 pb-14 overflow-hidden">
+          <div
+            className="absolute inset-0 -z-10 opacity-[0.05]"
+            style={{
+              backgroundImage: "radial-gradient(currentColor 1.5px, transparent 1.5px)",
+              backgroundSize: "18px 18px",
+            }}
+          />
+
+          <div className="flex flex-col items-center text-center gap-5 px-1">
+            <h2 className="font-display text-display text-balance max-w-[32rem]">
+              Gimana kalau jualan produk desa bisa bikin kamu naik level?
+            </h2>
+            <p className="font-body text-body text-ink-soft max-w-[28rem]">
+              Di KopQuest, kontribusimu ke koperasi jadi XP, reward, dan reputasi nyata.
+            </p>
+            <PushButton href="/register" size="lg" className="mt-1">
+              Ayo mulai game pertamamu
+            </PushButton>
           </div>
-          <h2 className="font-display text-display text-balance max-w-[32rem]">
-            Gimana kalau jualan produk desa bisa bikin kamu naik level?
-          </h2>
-          <p className="font-body text-body text-ink-soft max-w-[28rem]">
-            Di KopQuest, kontribusimu ke koperasi jadi XP, reward, dan reputasi nyata.
-          </p>
-          <PushButton href="/register" size="lg" className="mt-2">
-            Mulai misi pertamamu
-          </PushButton>
+
+          {/* Mission board: kartu misi bertumpuk + XP badge melayang */}
+          <div className="relative mt-10 h-[230px] flex items-center justify-center">
+            {/* kartu belakang — dekoratif, redup */}
+            <Card
+              variant="hero"
+              className="absolute w-40 !p-3 rotate-[-9deg] -translate-x-3 opacity-45 z-0 text-left"
+            >
+              <span className="w-7 h-7 rounded-full bg-tertiary text-white border-2 border-ink flex items-center justify-center">
+                <span className="material-symbols-rounded" style={{ fontSize: 14 }}>
+                  diversity_3
+                </span>
+              </span>
+              <p className="font-display text-caption text-ink mt-2">Duta Sebaya</p>
+            </Card>
+
+            {/* kartu tengah — dekoratif, agak redup */}
+            <Card
+              variant="hero"
+              className="absolute w-44 !p-3 rotate-[7deg] translate-x-3 opacity-70 z-10 text-left"
+            >
+              <span className="w-7 h-7 rounded-full bg-secondary text-white border-2 border-ink flex items-center justify-center">
+                <span className="material-symbols-rounded" style={{ fontSize: 14 }}>
+                  photo_camera
+                </span>
+              </span>
+              <p className="font-display text-caption text-ink mt-2">Content Creator</p>
+            </Card>
+
+            {/* kartu depan — misi utama, melayang pelan */}
+            <div className="relative z-20 animate-float">
+              <Card
+                variant="hero"
+                className="w-60 !p-4 rotate-[-2deg] text-left flex flex-col gap-2.5"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-9 h-9 rounded-full bg-primary text-white border-2 border-ink flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-rounded" style={{ fontSize: 18 }}>
+                      storefront
+                    </span>
+                  </span>
+                  <span className="font-display text-body-strong text-ink">Affiliator</span>
+                </div>
+                <p className="font-body text-caption text-ink-soft leading-snug">
+                  &quot;Jual 10 produk koperasi&quot;
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  <Chip variant="earth">Rp200rb</Chip>
+                  <Chip variant="success">+30 XP</Chip>
+                </div>
+                <div>
+                  <ProgressBar percent={70} className="h-2.5" />
+                  <p className="font-body text-caption text-ink-soft mt-1">3 hari lagi</p>
+                </div>
+              </Card>
+            </div>
+
+            {/* XP badge melayang */}
+            <div className="absolute -top-2 right-3 z-30 rotate-[6deg]">
+              <div className="animate-float bg-secondary text-white border-2.5 border-ink rounded-chip shadow-solid-sm px-3 py-1.5">
+                <span className="font-display text-label font-extrabold whitespace-nowrap">
+                  +50 XP! ✨
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* progress bar hero */}
+          <div className="max-w-[18rem] mx-auto mt-6 px-1">
+            <p className="text-center font-body text-caption font-semibold text-ink-soft mb-1.5">
+              Level 1 → Level 2
+            </p>
+            <ProgressBar percent={65} />
+          </div>
         </section>
 
         {/* 2. Pilih Role-mu */}
