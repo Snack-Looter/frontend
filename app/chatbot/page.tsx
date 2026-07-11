@@ -276,6 +276,45 @@ function EmptyState({ onPick }: { onPick: (text: string) => void }) {
   );
 }
 
+// Parser markdown inline seadanya untuk balasan AI: mendukung **bold** dan
+// *italic* (Gemini memakai keduanya). Sengaja ringan — tanpa dependency —
+// dan mengandalkan `whitespace-pre-wrap` di bubble untuk baris baru & list.
+function renderRichText(text: string): React.ReactNode[] {
+  // `**bold**` dicoba lebih dulu; italic mensyaratkan `*` tidak diikuti/diakhiri
+  // spasi supaya penanda bullet "* item" tidak ikut ter-italic-kan.
+  const pattern = /(\*\*(.+?)\*\*|\*(?!\s)(.+?)(?<!\s)\*)/g;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2] !== undefined) {
+      nodes.push(
+        <strong key={key++} className="font-bold">
+          {match[2]}
+        </strong>,
+      );
+    } else if (match[3] !== undefined) {
+      nodes.push(
+        <em key={key++} className="italic">
+          {match[3]}
+        </em>,
+      );
+    }
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+}
+
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
@@ -293,7 +332,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     <div className="flex justify-start items-end gap-2 animate-slide-in-left">
       <BotAvatar size={32} />
       <div className="max-w-[80%] bg-surface-card text-ink border-2.5 border-ink rounded-card rounded-bl-chip shadow-solid-sm px-4 py-3 whitespace-pre-wrap font-body text-body">
-        {message.text}
+        {renderRichText(message.text)}
       </div>
     </div>
   );
