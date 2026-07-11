@@ -102,3 +102,12 @@ docker run -p 3000:3000 kopquest-frontend
 ## Deployment
 
 Push ke branch `development` akan otomatis men-trigger GitHub Actions (`.github/workflows/deploy.yml`) yang melakukan build image Docker, push ke Google Artifact Registry, lalu deploy ke Google Cloud Run (region `asia-southeast2`). URL backend Cloud Run diambil otomatis sebagai `NEXT_PUBLIC_API_URL` saat build image.
+
+## AI Acknowledgement
+
+Beberapa bagian pengembangan KopQuest dibantu dengan tools AI, dengan penggunaan terbatas pada:
+
+- **Generative image AI** — untuk membuat 3 desain maskot (aset visual) yang digunakan sebagai kebutuhan konten di aplikasi.
+- **AI coding assistant** — untuk membantu proses debugging error, penulisan dokumentasi (termasuk README ini), dan eksplorasi kode.
+
+Logika bisnis, arsitektur, dan keputusan desain produk tetap dikerjakan dan divalidasi oleh tim pengembang.
