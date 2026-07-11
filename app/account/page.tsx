@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/Card";
 import { Chip, StickerTag } from "@/components/ui/Chip";
 import { FieldInput } from "@/components/ui/FieldInput";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { SelectField } from "@/components/ui/SelectField";
 import { Modal, BottomSheet } from "@/components/ui/Modal";
 import { PushButton } from "@/components/ui/PushButton";
@@ -118,7 +119,7 @@ export default function AccountPage() {
       <div className="bg-surface text-ink font-body text-body min-h-screen flex flex-col">
         <AppHeader />
         <main className="flex-grow pt-16 pb-24 max-w-app mx-auto w-full px-md flex items-center justify-center">
-          <p className="font-body text-body text-ink-soft">Memuat akunmu...</p>
+          <PageLoader label="Memuat akunmu..." />
         </main>
       </div>
     );
@@ -154,13 +155,13 @@ export default function AccountPage() {
 
         {/* 1. Avatar + identitas singkat */}
         <section className="pt-8 pb-6">
-          <p className="font-body text-label font-semibold text-primary mb-3">Akun Saya</p>
+          <h1 className="font-display text-display text-ink mb-3">Akun Saya</h1>
           <div className="flex items-center gap-4">
             <Avatar name={profile?.name ?? "?"} src={profile?.profile_picture || undefined} size={64} />
             <div className="min-w-0">
-              <h1 className="font-display text-display text-ink truncate">
+              <h2 className="font-display text-title text-ink truncate">
                 {profile?.name ?? "Akun"}
-              </h1>
+              </h2>
               <p className="font-body text-body text-ink-soft truncate">
                 @{profile?.user_name} · {profile?.koperasi_name}
               </p>

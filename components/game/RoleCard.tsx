@@ -20,6 +20,7 @@ export function RoleCard({
   color,
   badge,
   locked,
+  bareIcon = false,
   onClick,
 }: {
   icon: ReactNode;
@@ -28,6 +29,7 @@ export function RoleCard({
   color: RoleColor;
   badge?: string;
   locked?: boolean;
+  bareIcon?: boolean;
   onClick?: () => void;
 }) {
   const c = COLOR_STYLES[color];
@@ -60,11 +62,15 @@ export function RoleCard({
       {badge && (
         <StickerTag variant={color === "tertiary" ? "warning" : color}>{badge}</StickerTag>
       )}
-      <span
-        className={`w-14 h-14 rounded-full text-white border-2.5 border-ink flex items-center justify-center mt-1 ${c.iconBg}`}
-      >
-        {icon}
-      </span>
+      {bareIcon ? (
+        <div className="mt-1 flex items-center justify-center">{icon}</div>
+      ) : (
+        <span
+          className={`w-14 h-14 rounded-full text-white border-2.5 border-ink flex items-center justify-center mt-1 ${c.iconBg}`}
+        >
+          {icon}
+        </span>
+      )}
       <h4 className="font-display text-title-sm text-ink">{name}</h4>
       <p className="font-body text-caption text-ink-soft">{description}</p>
     </div>

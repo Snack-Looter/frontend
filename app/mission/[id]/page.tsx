@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Chip, StickerTag } from "@/components/ui/Chip";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { PushButton } from "@/components/ui/PushButton";
@@ -108,9 +109,7 @@ export default function MissionDetailPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto px-md py-5">
-        {loading && (
-          <p className="font-body text-body text-ink-soft text-center mt-12">Memuat misi...</p>
-        )}
+        {loading && <PageLoader label="Memuat misi..." />}
 
         {!loading && notFound && (
           <Card className="text-center flex flex-col items-center gap-3 mt-8">

@@ -85,13 +85,10 @@ export default function Home() {
             />
           </div>
           <h2 className="font-display text-display text-balance max-w-[32rem]">
-            Bantu koperasimu, naik level, dapat cuan nyata.
+            Gimana kalau jualan produk desa bisa bikin kamu naik level?
           </h2>
           <p className="font-body text-body text-ink-soft max-w-[28rem]">
-            Kerjakan misi nyata di koperasi desamu: jualan produk, bikin
-            konten promosi, atau ajak warga bergabung. Setiap misi yang
-            selesai menambah XP, menaikkan level, dan mendekatkanmu ke hadiah
-            asli.
+            Di KopQuest, kontribusimu ke koperasi jadi XP, reward, dan reputasi nyata.
           </p>
           <PushButton href="/register" size="lg" className="mt-2">
             Mulai misi pertamamu
@@ -109,11 +106,12 @@ export default function Home() {
                 badge={role.badge}
                 name={role.name}
                 description={role.description}
+                bareIcon
                 icon={
                   <img
                     src={role.mascot}
                     alt={`Maskot ${role.name}`}
-                    className="w-full h-full rounded-full object-cover"
+                    className="w-14 h-14 rounded-full object-cover"
                   />
                 }
               />

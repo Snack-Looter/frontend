@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { PushButton } from "@/components/ui/PushButton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -61,7 +62,7 @@ export default function RewardPage() {
   if (!checked || (isAuthed && loading)) {
     return (
       <Shell>
-        <p className="font-body text-body text-ink-soft text-center mt-12">Memuat reward kamu...</p>
+        <PageLoader label="Memuat reward kamu..." />
       </Shell>
     );
   }

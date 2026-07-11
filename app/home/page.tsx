@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/Card";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { PushButton } from "@/components/ui/PushButton";
 import { Chip, StickerTag } from "@/components/ui/Chip";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -141,7 +142,7 @@ export default function HomePage() {
       <div className="bg-surface text-ink font-body text-body min-h-screen flex flex-col">
         <AppHeader />
         <main className="flex-grow pt-16 pb-24 max-w-app mx-auto w-full px-md flex items-center justify-center">
-          <p className="font-body text-body text-ink-soft">Memuat berandamu...</p>
+          <PageLoader label="Memuat berandamu..." />
         </main>
       </div>
     );

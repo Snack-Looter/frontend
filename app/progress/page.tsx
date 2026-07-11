@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { PushButton } from "@/components/ui/PushButton";
 import { useIsAuthed } from "@/lib/auth";
@@ -111,7 +112,7 @@ export default function ProgressPage() {
   if (!checked || (isAuthed && loading)) {
     return (
       <Shell>
-        <p className="font-body text-body text-ink-soft text-center mt-12">Memuat progresmu...</p>
+        <PageLoader label="Memuat progresmu..." />
       </Shell>
     );
   }
