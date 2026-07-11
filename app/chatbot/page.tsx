@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ApiError, login, sendChatMessage } from "@/lib/api";
 import { getAccessToken, saveTokens } from "@/lib/auth";
@@ -23,6 +24,8 @@ const SUGGESTIONS = [
 ];
 
 export default function ChatbotPage() {
+  const router = useRouter();
+
   const [isAuthed, setIsAuthed] = useState(false);
   const [checkedAuth, setCheckedAuth] = useState(false);
 
@@ -54,7 +57,9 @@ export default function ChatbotPage() {
     try {
       const tokens = await login(email, password);
       saveTokens(tokens);
-      setIsAuthed(true);
+      // Setiap login berhasil diarahkan ke Beranda (bukan bertahan di chatbot).
+      // `replace` supaya tombol Back tidak kembali ke form login.
+      router.replace("/home");
     } catch (err) {
       setLoginError(err instanceof ApiError ? err.message : "Gagal login. Coba lagi.");
     } finally {
